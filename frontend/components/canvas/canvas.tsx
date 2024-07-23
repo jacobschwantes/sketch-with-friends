@@ -134,7 +134,7 @@ function Canvas() {
 	const handleNewStroke = React.useCallback(
 		(e: React.MouseEvent<HTMLCanvasElement>) => {
 			handleEvent({
-				type: RoomEventType.NEW_STROKE,
+				type: RoomEventType.STROKE,
 				payload: {
 					color: settings.color,
 					width: settings.strokeWidth,
@@ -162,22 +162,6 @@ function Canvas() {
 		<div className="w-screen h-screen relative overflow-hidden">
 			<div className="absolute top-3 right-3">
 				<CopyRoomLink />
-			</div>
-
-			<div className="absolute top-3 left-3">
-				<Button
-					onClick={() =>
-						handleEvent({
-							type: RoomEventType.START_GAME,
-							payload: {
-								rounds: 5,
-								timeLimit: 60,
-							},
-						})
-					}
-				>
-					Start Game
-				</Button>
 			</div>
 
 			<canvas

@@ -23,7 +23,7 @@ func init() {
 }
 
 func run(ctx context.Context) error {
-	slog.Info("starting up realtime server")
+	slog.Info("Realtime server starting")
 	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt)
 	defer cancel()
 
@@ -31,11 +31,11 @@ func run(ctx context.Context) error {
 	host := os.Getenv("HOST")
 
 	if port == "" {
-		slog.Warn("PORT not set, defaulting to 8080")
+		slog.Warn("PORT not specified, defaulting to 8080")
 		port = "8080"
 	}
 	if host == "" {
-		slog.Warn("HOST not set, defaulting to localhost")
+		slog.Warn("HOST not specified, defaulting to localhost")
 		host = "localhost"
 	}
 

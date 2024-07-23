@@ -5,12 +5,10 @@ import (
 	"crypto/rand"
 	"fmt"
 	"log/slog"
-	"runtime"
 	"sync"
 	"time"
 )
 
-// !!! Need to add lock to map operations
 const (
 	MAX_LOBBIES        = 20
 	LOBBY_TIMEOUT      = 15 * time.Minute
@@ -36,12 +34,12 @@ func NewRoomManager() RoomManager {
 }
 
 func (rm *roomManager) Run(ctx context.Context) {
-	slog.Info("Starting room manager")
+	slog.Info("Room manager started")
 	ticker := time.NewTicker(REPORTING_INTERVAL)
 	defer ticker.Stop()
 
 	defer func() {
-		slog.Info("Shutting down room manager")
+		slog.Info("Room manager exited")
 	}()
 	for {
 		select {
@@ -54,36 +52,25 @@ func (rm *roomManager) Run(ctx context.Context) {
 				playerCount += len(room.Players())
 			}
 			rm.mu.Unlock()
-			var m runtime.MemStats
-			runtime.ReadMemStats(&m)
-			slog.Debug("System metrics",
-				"goroutines", runtime.NumGoroutine(),
-				"total_alloc_mib", formatBytes(m.TotalAlloc),
-				"heap_alloc_mib", formatBytes(m.HeapAlloc),
-				"stack_inuse_mib", formatBytes(m.StackInuse),
-				"heap_released_mib", formatBytes(m.HeapReleased),
-				"heap_inuse_mib", formatBytes(m.HeapInuse),
-				"heap_idle_mib", formatBytes(m.HeapIdle),
-				"heap_objects", m.HeapObjects,
-				"player_count", playerCount,
-				"rooms", len(rm.rooms),
-			)
 		}
 	}
 }
 
-func formatBytes(b uint64) uint64 {
-	return b / 1024 / 1024
-}
-
 func (rm *roomManager) CreateRoom() (Room, error) {
+	rm.mu.Lock()
+	if len(rm.rooms) >= MAX_LOBBIES {
+		rm.mu.Unlock()
+		slog.Warn("maximum number of rooms reached, cannot create a new room")
+		return nil, fmt.Errorf("maximum number of rooms reached")
+	}
+
 	code, err := rm.uniqueRoomCode()
 	if err != nil {
+		rm.mu.Unlock()
 		return nil, err
 	}
 
 	room := NewRoom(code)
-	rm.mu.Lock()
 	rm.rooms[code] = room
 	rm.mu.Unlock()
 
@@ -116,7 +103,7 @@ func (rm *roomManager) Room(code string) (Room, error) {
 func (rm *roomManager) uniqueRoomCode() (string, error) {
 	rm.mu.Lock()
 	defer rm.mu.Unlock()
-	code, err := generateRandomCode(4)
+	code, err := generateRandomCode(6)
 	if err != nil {
 		return "", err
 	}
@@ -129,7 +116,7 @@ func (rm *roomManager) uniqueRoomCode() (string, error) {
 }
 
 func generateRandomCode(length int) (string, error) {
-	const charset = "ABCDEFGHIJKLNPQRSTUVWXYZ"
+	const charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 	b := make([]byte, length)
 	if _, err := rand.Read(b); err != nil {
 		return "", err

@@ -25,6 +25,17 @@ Run the application:
 ```bash
 go run *.go
 ```
+### Air
+Instead of running `go run *.go` every time you make a change, you can use `air` to automatically restart the server when files change.
+
+Install air:
+```bash
+go install github.com/cosmtrek/air@latest
+```
+Run the application with hot reloading:
+```bash
+air
+```
 
 ## Learn more
 - [gorilla/websocket - Chat Example](https://github.com/gorilla/websocket/tree/master/examples/chat): The code in this repository is partially based on this example and can be a good starting point for understanding how to use WebSockets in Go.

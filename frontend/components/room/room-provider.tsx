@@ -19,7 +19,7 @@ import {
 	Stroke,
 	Tool,
 } from "@/types/canvas";
-import { Player } from "@/types/player";
+import { Player, PlayerRole } from "@/types/player";
 
 interface RoomContextType {
 	handleEvent: (event: RoomEvent) => void;
@@ -38,10 +38,10 @@ const defaultContext: RoomContextType = {
 		tool: Tool.BRUSH,
 	},
 	room: {
-		role: "",
+		role: PlayerRole.PLAYER,
 		code: "",
 		players: [] as Player[],
-		status: RoomStatus.WAITING,
+		status: RoomStatus.UNINITIALIZED,
 		game: {
 			strokes: [] as Stroke[],
 		},
@@ -52,7 +52,7 @@ export const useRoomContext = () => useContext(RoomContext);
 
 const roomReducer = (state: RoomState, event: RoomEvent) => {
 	switch (event.type) {
-		case RoomEventType.NEW_STROKE:
+		case RoomEventType.STROKE:
 			return {
 				...state,
 				game: {
@@ -67,7 +67,7 @@ const roomReducer = (state: RoomState, event: RoomEvent) => {
 			const copy = [...state.game.strokes];
 			copy[copy.length - 1].points.push(event.payload);
 			return { ...state, game: { ...state.game, strokes: copy } };
-		case RoomEventType.INITIAL_STATE:
+		case RoomEventType.STATE:
 			return { ...state, ...event.payload };
 		case RoomEventType.CLEAR_STATE:
 			return defaultContext.room;

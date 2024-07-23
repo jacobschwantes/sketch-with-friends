@@ -1,16 +1,17 @@
 import { Stroke } from "./canvas";
-import { Player } from "./player";
+import { Player, PlayerRole } from "./player";
 
 export enum RoomEventType {
 	START_GAME = "START_GAME",
-	INITIAL_STATE = "INITIAL_STATE",
-	NEW_STROKE = "NEW_STROKE",
+	STATE = "STATE",
+	STROKE = "STROKE",
 	STROKE_POINT = "STROKE_POINT",
 	CLEAR_STATE = "CLEAR_STATE",
 	CLEAR_STROKES = "CLEAR_STROKES",
 	UNDO_STROKE = "UNDO_STROKE",
 }
 export type RoomState = {
+	role: PlayerRole;
 	status: RoomStatus;
 	code: string;
 	players: Player[];
@@ -24,27 +25,35 @@ export type GameState = {
 export enum RoomStatus {
 	WAITING = "WAITING",
 	PLAYING = "PLAYING",
+	UNINITIALIZED = "UNINITIALIZED",
 	FINISHED = "FINISHED",
 }
 
-export type InitialState = {
-	type: RoomEventType.INITIAL_STATE;
+export type RoomEvent =
+	| StateEvent
+	| StrokeEvent
+	| StrokePointEvent
+	| StartGameEvent
+	| ClearStateEvent
+	| ClearStrokesEvent
+	| UndoStrokeEvent;
+
+export type StateEvent = {
+	type: RoomEventType.STATE;
 	payload: RoomState;
 };
 
-export type RoomEvent = InitialState | NewStroke | StrokePoint | StartGame | ClearState | ClearStrokes | UndoStroke;
-
-export type NewStroke = {
-	type: RoomEventType.NEW_STROKE;
+export type StrokeEvent = {
+	type: RoomEventType.STROKE;
 	payload: Stroke;
 };
 
-export type StrokePoint = {
+export type StrokePointEvent = {
 	type: RoomEventType.STROKE_POINT;
 	payload: number[];
 };
 
-export type StartGame = {
+export type StartGameEvent = {
 	type: RoomEventType.START_GAME;
 	payload: {
 		rounds: number;
@@ -52,14 +61,13 @@ export type StartGame = {
 	};
 };
 
-export type ClearState = {
+export type ClearStateEvent = {
 	type: RoomEventType.CLEAR_STATE;
 };
 
-export type ClearStrokes = {
+export type ClearStrokesEvent = {
 	type: RoomEventType.CLEAR_STROKES;
 };
-export type UndoStroke = {
+export type UndoStrokeEvent = {
 	type: RoomEventType.UNDO_STROKE;
 };
-
